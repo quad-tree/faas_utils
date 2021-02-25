@@ -7,7 +7,8 @@
  * 
  */
 const DEBUG = false;
-const EVENTS_URL = 'https://faasd.sys.erpcloud.mx/async-function/events'; //todo pasar a un secret
+// const EVENTS_URL = 'https://faasd.sys.erpcloud.mx/async-function/events'; 
+const EVENTS_URL = 'https://faasd.sys.erpcloud.mx/function/events'; //todo pasar a un secret
 var events_autosave = true;
 
 var faa = require("./faas_secrets");
@@ -48,10 +49,13 @@ var event_save = async function (data) {
             data: data
         };
         var event_result = await axios(config);
+        console.log(event_result)
         return event_result.data
     } catch (error) {
-        return error
-        // return { "error": "ERROR: on event_save" }
+        return {
+            "status": "error",
+            "message": error
+        }
     }
 }
 
