@@ -6,6 +6,10 @@
  * License: MIT
  * 
  */
+
+// REQUIREMENT TO SAVE EVENTS: 
+// OPENFAAS SECRET: events-save-url
+
 const DEBUG = false;
 
 const fs = require('fs').promises;

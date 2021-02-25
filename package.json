@@ -1,14 +1,29 @@
 {
     "name": "faas_utils",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "OpenFaas utilities for nodejs, using hasura-axios-vault-nunjucks",
-    "main": "faas_utils.js",
+    "main": "./faas_utils.js",
     "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 0"
+      "test": "echo \"Error: no test specified\" && exit 1"
     },
-    "keywords": [],
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/quad-tree/faas_utils.git"
+    },
+    "keywords": [
+      "openfaas",
+      "node",
+      "hasura",
+      "vault",
+      "severless",
+      "secrets"
+    ],
     "author": "Quad Tree SA de CV",
     "license": "MIT",
+    "bugs": {
+      "url": "https://github.com/quad-tree/faas_utils/issues"
+    },
+    "homepage": "https://github.com/quad-tree/faas_utils#readme",
     "dependencies": {
       "axios": "^0.21.1",
       "fs": "^0.0.1-security",
