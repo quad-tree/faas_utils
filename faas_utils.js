@@ -173,11 +173,111 @@ var call_service = async function (servicename, template_data) {
 }
 
 
+class ParamTester {
+    constructor(params) {
+        this.params = params; // params to test
+        this.cb = function () {
+            return null
+        }; // callback on true
+        this.ef; // expand function (usually getVaultSecret)
+        this.missing = []; // missing params
+    }
+
+    setcallback(cb) {
+        this.cb = cb; // callback on true
+    }
+
+    addparam(key, val) {
+        this.params[key] = val
+    }
+
+    check_has_keys(req_list, obj) {
+        let result = true;
+        this.missing = [];
+        req_list.forEach(element => {
+            if (element.indexOf(".") !== -1) {
+                let subobj = obj[element.split(".")[0]];
+                let subelement = [element.split(".")[1]];
+                result = result && this.check_has_keys(subelement, subobj)
+            } else {
+                result = result && obj.hasOwnProperty(element);
+                if (!obj.hasOwnProperty(element)) {
+                    this.missing.push(element)
+                }
+            }
+        });
+        return result
+    }
+
+    async check_and_eval(req_strlist, cb) {
+        if (cb) {
+            this.cb = cb
+        }
+        var req_list = req_strlist.split(",");
+        if (this.check_has_keys(req_list, this.params)) {
+            return await this.cb(this.params)
+        } else {
+            return {
+                "status": "error",
+                "message": `missing parameter(s): ${JSON.stringify(this.missing)}`
+            }
+        }
+    }
+
+    set_expandfunction(ef) {
+        this.ef = ef
+    }
+
+    // https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop/37576787#37576787
+    async expand(exp_strlist) {
+        if (this.ef) {
+            var exp_list = exp_strlist.split(",");
+            if (this.check_has_keys(exp_list, this.params)) {
+                await Promise.all(exp_list.map(async (element) => {
+                    this.params[element] = await this.ef(this.params[element])
+                    //console.log(this.params[element])
+                }))
+            } else {
+                this.params["error"] = `expand error: ${exp_strlist}`;
+            }
+        } else {
+            this.params["error"] = "set_expandfunction first before call expand";
+        }
+    }
+
+    getparams() {
+        return this.params
+    }
+
+    async evaluate() {
+        return await this.cb(this.params)
+    }
+}
+
+
+// source: https://www.freecodecamp.org/news/javascript-typeof-how-to-check-the-type-of-a-variable-or-object-in-js/
+var typeCheck = function (value) {
+    const return_value = Object.prototype.toString.call(value);
+    // we can also use regex to do this...
+    const type = return_value.substring(
+        return_value.indexOf(" ") + 1,
+        return_value.indexOf("]"));
+
+    return type.toLowerCase();
+}
+
+var getAction = function (params) {
+    return (params.hasOwnProperty("action") ? params.action : (params.hasOwnProperty("hasura") ? params.hasura.action : undefined))
+}
+
 module.exports = {
-    getSecret: getSecret,
-    getVaultSecret: getVaultSecret,
-    getHasuraParams: getHasuraParams,
-    jsonApplyTemplate: jsonApplyTemplate,
-    call_service: call_service,
-    event_save: event_save
+    getSecret,
+    getVaultSecret,
+    getHasuraParams,
+    jsonApplyTemplate,
+    call_service,
+    event_save,
+    ParamTester,
+    typeCheck,
+    getAction
 }
